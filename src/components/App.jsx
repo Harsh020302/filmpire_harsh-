@@ -8,15 +8,16 @@ import { Actors , MovieInformation , Movies , NavBar , Profile } from './';
 
 const App = () => {
   const classes = useStyles();
+  console.log(classes.content)
   return(
     <div className={classes.root}>
       <CssBaseline/>
       <NavBar />
       <main className={classes.content}>
-        <div className={classes.toolbar} />
+        <div className={classes.toolkit} />
         <Routes>
-          <Route exact path='/' element={<MovieInformation/>}/>
-          <Route exact path='/movies/:id' element={<Movies/>} />
+          <Route exact path='/' element={<Movies/>}/>
+          <Route exact path='/movie/:id' element={<MovieInformation/>} />
           <Route exact path='/actors/:id' element={<Actors/>} />
           <Route exact path='/profile/:id' element={<Profile/>} />
         </Routes>
