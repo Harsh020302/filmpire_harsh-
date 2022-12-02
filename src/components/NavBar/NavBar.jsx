@@ -1,4 +1,4 @@
-import React ,{useState} from 'react'
+import React ,{useEffect, useState} from 'react'
 import { AppBar, IconButton ,Toolbar , Drawer , Button , Avatar } from '@mui/material';
 import { Menu, AccountCircle , Brightness4 , Brightness7  } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
@@ -6,70 +6,90 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { Sidebar } from '..';
 import useStyles from './styles';
-const NavBar = () => {
-  const [mobileOpen , setMobileOpen] = useState(false);
-    const classes = useStyles();
-    const isMobile = useMediaQuery('(max-width:600px)');
-    const theme = useTheme();
-    const isAuthenticated = true;
+import Search from '../Search/Search.jsx';
+import { setUser } from '../features/auth.js';
+import { fetchToken,createSessionId,moviesApi } from '../../utils';
+import { useSelector,useDispatch } from 'react-redux';
+
+const Navbar = () => {
+  const classes = useStyles();
+  const isMobile = useMediaQuery('(max-width:600px)');
+  const theme = useTheme();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  console.log(isAuthenticated);
+  //const colorMode = useContext(ColorModeContext);
+
+  const token = localStorage.getItem('request_token');
+  const sessionIdFromLocalStorage = localStorage.getItem('session_id');
+
+  useEffect(() => {
+    const logInUser = async () => {
+      if (token) {
+        if (sessionIdFromLocalStorage) {
+          const { data: userData } = await moviesApi.get(`/account?session_id=${sessionIdFromLocalStorage}`);
+          dispatch(setUser(userData));
+        } else {
+          const sessionId = await createSessionId();
+          const { data: userData } = await moviesApi.get(`/account?session_id=${sessionId}`);
+          dispatch(setUser(userData));
+        }
+      }
+    };
+
+    logInUser();
+  }, [token]);
+
   return (
     <>
-      <AppBar position = 'fixed'>
+      <AppBar position="fixed">
         <Toolbar className={classes.toolbar}>
           {isMobile && (
-            <IconButton
-              color='inherit'
-              edge='start'
-              style={{outline: 'none'}}
-              onClick={()=> setMobileOpen((prevMobileOpen)=> !prevMobileOpen)}
-              className={classes.menuButton}
-            >
-              <Menu />
-            </IconButton>
-          )}
-
           <IconButton
-              color='inherit'
-              sx = {{ ml: 1 }}
-              onClick={()=>{}}
-            >
-            {theme.palette.mode === 'dark' ? <Brightness7/> : <Brightness4/>  }
+            color="inherit"
+            edge="start"
+            style={{ outline: 'none' }}
+            onClick={() => setMobileOpen((prevMobileOpen) => !prevMobileOpen)}
+            className={classes.menuButton}
+          >
+            <Menu />
           </IconButton>
-
-          {!isMobile && 'search...'}
-
-          <div>
-
-
+          )}
+          <IconButton
+            color="inherit"
+            sx={{ ml: 1 }}
             
-            { !isAuthenticated ? (
-              <Button color='inherit' onClick={() => {} } >
-                Login &nbsp: <AccountCircle />
+          >
+            {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+          </IconButton>
+          {!isMobile && <Search />}
+          <div>
+            {!isAuthenticated ? (
+              <Button color="inherit" onClick={fetchToken}>
+                Login &nbsp; <AccountCircle />
               </Button>
             ) : (
-
-                <Button
+              <Button
                 color="inherit"
                 component={Link}
-                to="/profile/:id"
+                to={`/profile/${user.id}`}
                 className={classes.linkButton}
               >
                 {!isMobile && <>My Movies &nbsp;</>}
                 <Avatar
                   style={{ width: 30, height: 30 }}
                   alt="Profile"
-                  src='https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png'
+                  src={`https://www.themoviedb.org/t/p/w64_and_h64_face${user?.avatar?.tmdb?.avatar?.avatar_path}`}
                 />
               </Button>
-              
-            ) }
-
+            )}
           </div>
-          {isMobile && 'search...'}
+          {isMobile && <Search />}
         </Toolbar>
       </AppBar>
-      <div >
-      <nav className={classes.drawer}>
+      <div>
+        <nav className={classes.drawer}>
           {isMobile ? (
             <Drawer
               variant="temporary"
@@ -89,7 +109,7 @@ const NavBar = () => {
         </nav>
       </div>
     </>
-  )
+  );
 }
 
-export default NavBar
+export default Navbar;
