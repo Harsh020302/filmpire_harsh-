@@ -7,7 +7,8 @@ import {MovieList} from '..';
 import Pagination from '../Pagination/Pagination.jsx';
 
 const Movies = () => {
-  console.log('Movies');
+  const lg = useMediaQuery((theme)=>(theme.breakpoints.only('lg')));
+  const numberOfMovies = lg ? 16 : 18;
   const [page,setPage] = useState(1);
   const { genreIdOrCategoryName,searchQuery } = useSelector((state)=>state.currentGenreOrCategory);
   const {data,error,isFetching} = useGetMoviesQuery({genreIdOrCategoryName,page,searchQuery});
@@ -40,7 +41,7 @@ const Movies = () => {
   return (
     <div>
     {/* <h2>LOadion</h2> */}
-      <MovieList movies={data} />
+      <MovieList movies={data} numberOfMovies={numberOfMovies} />
       <Pagination currentPage={page} setPage={setPage} totalPages={data?.total_pages} />
     </div>
   )

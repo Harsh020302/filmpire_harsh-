@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 
 import useStyles from './styles';
 import { searchMovie } from '../features/CurrentGenreOrCategory';
+import { useLocation } from 'react-router-dom';
 
 
 
@@ -12,11 +13,17 @@ const Search = () => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const [query,setQuery] = useState('');
+    const location = useLocation();
+
     const handleKeyPress = (e)=>{
         if(e.key === 'Enter'){
             dispatch(searchMovie(query));
         }
     };
+
+    if(location.pathname !== '/'){
+        return null;
+    }
   return (
     <div>
         <TextField
